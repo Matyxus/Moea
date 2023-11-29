@@ -1,5 +1,5 @@
 mutable struct NsgaII
-    objective::Function
+    problem::Problem
     initialization::Function
     selection::Function
     crossover::Function
