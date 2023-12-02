@@ -10,8 +10,9 @@ is_type(::Any)::Nothing = nothing
 struct Permutation <: Representation end
 struct Binary <: Representation end
 struct Numbers <: Representation end
-is_type(val::Vector{Int64})::Union{Type{Permutation}, Type{Numbers}} = all(val .== 1:length(val)) ? Permutation : Numbers 
+is_type(val::Vector{Int64})::Union{Type{Permutation}, Type{Numbers}} = (Set(val) == Set(1:length(val))) ? Permutation : Numbers 
 is_type(::Vector{Bool})::Type{Binary} = Binary 
+is_type(::BitVector)::Type{Binary} = Binary 
 is_type(::Bool)::Type{Binary} = Binary 
 is_type(::Vector{Float64})::Type{Numbers} = Numbers
 is_type(::Float64)::Type{Numbers} = Numbers
