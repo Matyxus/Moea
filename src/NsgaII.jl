@@ -30,7 +30,7 @@ end
 
 
 function step(nsga::NsgaII)::Union{Vector{Individual}, Individual, Nothing}
-    println("Performing step of NsgaII algorithm")
+    # println("Performing step of NsgaII algorithm")
     if isempty(nsga.population)
         println("Error occured while initializing children!")
         return nothing
@@ -43,18 +43,15 @@ function step(nsga::NsgaII)::Union{Vector{Individual}, Individual, Nothing}
         # Crossover
         a, b = (
             (rand() > nsga.crossover_chance) ? 
-            nsga.crossover(nsga.population[i], nsga.population[j]) : 
-            (deepcopy(nsga.population[i]), deepcopy(nsga.population[j]))
+            nsga.crossover(nsga.population[i].solution, nsga.population[j].solution) : 
+            (deepcopy(nsga.population[i].solution), deepcopy(nsga.population[j].solution))
         )
         # Mutation
         if (rand() > nsga.mutation_chance); nsga.mutation!(a) end
         if (rand() > nsga.mutation_chance); nsga.mutation!(b) end
         # Evaluation
-        evaluate!(a, nsga.problem.optimization)
-        evaluate!(b, nsga.problem.optimization)
-        # Push new individuals to the current population
-        push!(nsga.population, a)
-        push!(nsga.population, b)
+        push!(nsga.population, Individual(a, nsga.problem.optimization))
+        push!(nsga.population, Individual(b, nsga.problem.optimization))
     end
     # ------ Domination, crowding distance, replacement ------ 
     # println("Computing domination, crowding distance, replacement")
@@ -144,7 +141,7 @@ function set_crowding_distance!(population::AbstractVector{Individual}, objectiv
         return
     end
     len::Int64 = length(population)
-    width::Float64 = 0
+    width::Real = 0
     if objectives == 1
         @assert all([isa(indiv.value, Real) for indiv in population])
         sort!(population, by = x -> x.value)
@@ -182,13 +179,11 @@ end
 function initialize_population(problem::Problem, init::Function, size::Int64)::Vector{Individual}
     println("Initializing population of type: $(problem.definition.representation_type), size: $(size)")
     println("Initialization function: $(init)")
-    population::Vector{Individual} = [init(problem) for _ in 1:size]
-    if !all([is_type(pop.solution) == problem.definition.representation_type for pop in population])
+    population::Vector{Individual} = [Individual(init(problem), problem.optimization) for _ in 1:size]
+    if !all([is_type(indiv.solution) == problem.definition.representation_type for indiv in population])
         println("Error, expected child type: $(problem.definition.representation_type), but init returned other!")
         return []
     end
-    evaluate!.(population, Ref(problem.optimization))
-    # Initialize population (we need both the new and old population to be in the same vector)
     return population
 end
 
@@ -198,9 +193,9 @@ function info(nsga::NsgaII)::Nothing
     println("Algorithm NSGA-II, population: '$(nsga.pop_size)'")
     println("Initialization: '$(nsga.initialization)', selection: '$(nsga.selection)'")
     println("Crossover: '$(nsga.crossover)', chance: $(nsga.crossover_chance)%")
-    println("Mutation: '$(nsga.mutation)', chance: $(nsga.mutation_chance)%")
+    println("Mutation: '$(nsga.mutation!)', chance: $(nsga.mutation_chance)%")
     return
 end
 
 
-
+export NsgaII, step

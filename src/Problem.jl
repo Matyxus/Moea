@@ -29,11 +29,17 @@ struct Optimization{N}
     Optimization(objective::Function, num_objectives::Int64, constraints::Vector{Function}, bounds::NTuple{2, NTuple{N, V}}
     ) where {N, V <: Real} = new{N}(objective, num_objectives, (x -> (|>).(Ref(x), constraints)), length(constraints), bounds, length(bounds))
 
-    Optimization(objective::Vector{Function}, num_objectives::Int64, constraints::Vector{Function}, bounds::NTuple{2, NTuple{N, V}}; 
+    Optimization(objective::Vector{Function}, num_objectives::Int64, constraints::Vector{Function}, bounds::NTuple{2, NTuple{N, V}} 
     ) where {N, V <: Real} = new{N}(
         (x -> (|>).(Ref(x), objective)), num_objectives,
         (x -> (|>).(Ref(x), constraints)), length(constraints), 
         bounds, length(bounds)
+    )
+
+    Optimization(objective::Vector{Function}, num_objectives::Int64, constraints::Vector{Function}) = new{0}(
+        (x -> (|>).(Ref(x), objective)), num_objectives,
+        (x -> (|>).(Ref(x), constraints)), length(constraints), 
+        nothing, 0
     )
 end
 
@@ -43,26 +49,27 @@ struct Problem
     Problem(definition::Definition, optimization::Optimization) = new(definition, optimization)
 end
 
-# --------------------------- Functions --------------------------- 
+# --------------------------- Functions ---------------------------
 
-function evaluate!(indiv::Individual, opt::Optimization)::Nothing
+function evaluate(solution::AbstractVector{T}, opt::Optimization)::Tuple{Union{AbstractVector, Real}, Real} where {T <: Real}
     # First we update the individual fitness
-    indiv.value = opt.objective(indiv.solution)
+    value::Union{AbstractVector, Real} = opt.objective(solution)
     # Next update the constraint violation
-    indiv.violation = constrain_violation(opt.constraints(indiv.solution))
+    violation::Real = constrain_violation(opt.constraints(solution))
     # Finally update bounds violation, if there are some
     if opt.bounds_count != 0
-        indiv.violation += bound_violation(indiv.solution, opt.bounds)
+        violation += bound_violation(solution, opt.bounds)
     end
-    return
+    return value, violation
 end
+
 # --- Bounds --- 
-bound_violation(solution::Real, bounds::NTuple{2, NTuple{1, Real}})::Float64 = max(0, solution - bounds[2][1], bounds[1][1] - solution)
+bound_violation(solution::Real, bounds::NTuple{2, NTuple{1, Real}})::Real = max(0, solution - bounds[2][1], bounds[1][1] - solution)
 bound_violation(solution::Vector{<: Real}, bounds::NTuple{2, NTuple{N, Real}}) where {N} = sum(max.(0, solution .- bounds[2], bounds[1] .- solution))
 # --- Constraints --- 
 # Here we are assuming that constraints were transformed into "<= 0" forms
-constrain_violation(constrain_value::Real)::Float64 = max(0, constrain_value)
-constrain_violation(constraints_values::Vector{<: Real})::Float64 = sum(max.(0, constraints_values))
+constrain_violation(constrain_value::Real)::Real = max(0, constrain_value)
+constrain_violation(constraints_values::Vector{<: Real})::Real = sum(max.(0, constraints_values))
 
 # --------------------------------- Utils --------------------------------- 
 
@@ -89,4 +96,5 @@ function check_params(definition::Definition, optimization::Optimization)::Bool
     
 end
 
+export Definition, Optimization, Problem
 

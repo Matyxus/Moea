@@ -1,18 +1,18 @@
 mutable struct Individual{T, V}
     solution::AbstractVector{T} # Solution
     value::V # Function value 
-    violation::Float64 # Sum of all constraint violations
+    violation::Real # Sum of all constraint violations
     # NsgaII parameters
     rank::Int64 
     crowding_distance::Float64
-    function Individual(solution::AbstractVector{T}, value::V = 0., violation::Float64 = 0.) where {T <: Real, V <: Union{AbstractVector, Real}}
+    function Individual(solution::AbstractVector{T}, value::V, violation::Real = 0.) where {T <: Real, V <: Union{AbstractVector, Real}}
         if isnothing(is_type(solution))
             println("Warning, Inidividual received invalid solution type: $(T)!")
         end
         return new{T, V}(solution, value, violation, 0, 0.)
     end
+    Individual(solution::AbstractVector{T}, opt::Optimization) where {T <: Real} = Individual(solution, evaluate(solution, opt)...)
 end
-
 
 # ---------------------- Domination of solutions ---------------------- 
 

@@ -5,5 +5,5 @@ end
 
 
 
-
+export binary_tournament_selection
 
