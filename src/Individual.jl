@@ -33,4 +33,5 @@ dominates(::Type{Minimization}, value_a::Vector{<: Real}, value_b::Vector{<: Rea
 # ---------------------- Utils ---------------------- 
 
 is_better(a::Individual, b::Individual)::Bool = (a.rank < b.rank) || (a.rank == b.rank && a.crowding_distance > b.crowding_distance)
+is_feasible(indiv::Individual)::Bool = (indiv.violation ≈ 0)
 

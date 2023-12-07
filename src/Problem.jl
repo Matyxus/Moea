@@ -64,12 +64,15 @@ function evaluate(solution::AbstractVector{T}, opt::Optimization)::Tuple{Union{A
 end
 
 # --- Bounds --- 
+bound_violation(solution::Any, bounds::Nothing)::Real = 0
 bound_violation(solution::Real, bounds::NTuple{2, NTuple{1, Real}})::Real = max(0, solution - bounds[2][1], bounds[1][1] - solution)
 bound_violation(solution::Vector{<: Real}, bounds::NTuple{2, NTuple{N, Real}}) where {N} = sum(max.(0, solution .- bounds[2], bounds[1] .- solution))
 # --- Constraints --- 
 # Here we are assuming that constraints were transformed into "<= 0" forms
 constrain_violation(constrain_value::Real)::Real = max(0, constrain_value)
 constrain_violation(constraints_values::Vector{<: Real})::Real = sum(max.(0, constraints_values))
+constrain_violation_squared(constrain_value::Real)::Real = max(0, constrain_value) ^ 2
+constrain_violation_squared(constraints_values::Vector{<: Real})::Real = sum(max.(0, constraints_values) .^ 2)
 
 # --------------------------------- Utils --------------------------------- 
 

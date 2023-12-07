@@ -10,5 +10,13 @@ b2(x) = (0 <= x[2] <= 100)
 def::Definition = Definition("g06", Minimization, Numbers, 2)
 opt::Optimization = Optimization(f, 1, [g1, g2], ((13, 0), (100, 100)))
 prob::Problem = Problem(def, opt)
-nsga::NsgaII = NsgaII(prob, uniform_init, binary_tournament_selection, blend_crossover, normal_mutation!)
-info(nsga)
+# nsga::NsgaII = NsgaII(prob, uniform_init, binary_tournament_selection, blend_crossover, normal_mutation!)
+sr::StochasticRanking = StochasticRanking(prob, uniform_init, tournament_selection, blend_crossover, normal_mutation!)
+info(sr)
+for _ in 1:499 
+    step(sr)
+    println(length(filter(x -> is_feasible(x), sr.population)))
+end
+step(sr)
+
+

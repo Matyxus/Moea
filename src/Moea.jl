@@ -17,5 +17,8 @@ include("Mutation.jl")
 include("Crossover.jl")
 # Algorithm
 include("NsgaII.jl")
+include("StochasticRanking.jl")
+
+
 
 

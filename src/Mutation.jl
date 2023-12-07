@@ -17,7 +17,7 @@ function flip!(solution::AbstractVector{Bool}, chance::Float64 = 0.1)::Nothing
 end
 
 function normal_mutation!(solution::Vector{Float64}, σ::Real = 1)::Nothing
-    solution += rand(Normal(0, σ), length(solution))
+    solution .+= rand(Normal(0, σ), length(solution))
     return
 end
 

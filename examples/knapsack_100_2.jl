@@ -7,10 +7,10 @@ nsga::NsgaII = NsgaII(
     binary_tournament_selection,
     one_point_crossover, flip! 
 )
-for _ in 1:999 
-    step(nsga)
-end
-step(nsga)
+temp = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+vals = rand(1:10, 5)
+println(vals)
+println(temp[vals])
 
 
 

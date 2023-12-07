@@ -77,13 +77,13 @@ end
 
 # ------------------- Numbers ------------------- 
 
-function arithmetic_crossover(a::Vector{Real}, b::Vector{Real})::Tuple{Vector{Real}, Vector{Real}}
+function arithmetic_crossover(a::Vector{T}, b::Vector{T})::Tuple{Vector{T}, Vector{T}}  where {T <: Real}
     @assert (is_type(a) == is_type(b) == Numbers)
     α::Float64 = (1 - rand())
     return (a .+ (α .* b)), (b .+ (α .* a))
 end
 
-function blend_crossover(a::Vector{Real}, b::Vector{Real}; α::Float64 = 0.5)::Tuple{Vector{Float64}, Vector{Float64}}
+function blend_crossover(a::Vector{T}, b::Vector{T}; α::Float64 = 0.5)::Tuple{Vector{Float64}, Vector{Float64}} where {T <: Real}
     @assert (is_type(a) == is_type(b) == Numbers)
     child_a::Vector{Float64} = []
     child_b::Vector{Float64} = []
