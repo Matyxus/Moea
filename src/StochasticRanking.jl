@@ -21,7 +21,7 @@ mutable struct StochasticRanking
         @assert(pop_size > 0)
         pop_size += isodd(pop_size)
         return new(
-            problem, initialize_population(problem, init, pop_size), 
+            problem, initialize_population(StochasticRanking, problem, init, pop_size), 
             init, selection, crossover, mutation, pop_size,
             crossover_chance, mutation_chance
         )
@@ -29,8 +29,7 @@ mutable struct StochasticRanking
 end
 
 
-
-function step(sr::StochasticRanking)::Union{Vector{Individual}, Individual, Nothing}
+function alg_step(sr::StochasticRanking)::Union{Vector{Individual}, Individual, Nothing}
     # println("Performing step of NsgaII algorithm")
     if isempty(sr.population)
         println("Error occured while initializing children!")
@@ -44,21 +43,21 @@ function step(sr::StochasticRanking)::Union{Vector{Individual}, Individual, Noth
         i, j = rand(indexes, 2)
         # Crossover
         a, b = (
-            (rand() > sr.crossover_chance) ? 
+            (rand() < sr.crossover_chance) ? 
             sr.crossover(sr.population[i].solution, sr.population[j].solution) : 
             (deepcopy(sr.population[i].solution), deepcopy(sr.population[j].solution))
         )
         # Mutation
-        if (rand() > sr.mutation_chance); sr.mutation!(a) end
-        if (rand() > sr.mutation_chance); sr.mutation!(b) end
+        if (rand() < sr.mutation_chance); sr.mutation!(a) end
+        if (rand() < sr.mutation_chance); sr.mutation!(b) end
         # Evaluation
-        push!(new_population, generate_individual(StochasticRanking, a, sr.problem.optimization))
-        push!(new_population, generate_individual(StochasticRanking, b, sr.problem.optimization))
+        push!(new_population, generate_individual(a, sr.problem.optimization))
+        push!(new_population, generate_individual(b, sr.problem.optimization))
     end
     # Generational replacement
     sr.population = new_population
     population_sort!(sr.population, sr.problem.definition.problem_type)
-    # Return the best solutions (the ones which are feasible)
+    # Return feasible solutions
     return filter(x -> is_feasible(x), sr.population)
 end
 
@@ -117,14 +116,14 @@ end
 
 # ------------------------------- Utils ------------------------------- 
 
-function generate_individual(::Type{StochasticRanking}, solution::AbstractVector{T}, opt::Optimization)::Individual where {T <: Real}
+function generate_individual(solution::AbstractVector{T}, opt::Optimization)::Individual where {T <: Real}
     return Individual(solution, opt.objective(solution), constrain_violation_squared(opt.constraints(solution)) + bound_violation(solution, opt.bounds))
 end
 
-function initialize_population(problem::Problem, init::Function, size::Int64)::Vector{Individual}
+function initialize_population(::Type{StochasticRanking}, problem::Problem, init::Function, size::Int64)::Vector{Individual}
     println("Initializing population of type: $(problem.definition.representation_type), size: $(size)")
     println("Initialization function: $(init)")
-    population::Vector{Individual} = [generate_individual(StochasticRanking, init(problem), problem.optimization) for _ in 1:size]
+    population::Vector{Individual} = [generate_individual(init(problem), problem.optimization) for _ in 1:size]
     if !all([is_type(indiv.solution) == problem.definition.representation_type for indiv in population])
         println("Error, expected child type: $(problem.definition.representation_type), but init returned other!")
         return []
@@ -147,4 +146,4 @@ function info(sr::StochasticRanking)::Nothing
 end
 
 
-export StochasticRanking, step
+export StochasticRanking, alg_step, info

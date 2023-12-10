@@ -1,4 +1,5 @@
 import Distributions: Uniform
+import Random: bitrand
 # ------------------- Permutation ------------------- 
 
 """
@@ -90,7 +91,7 @@ function blend_crossover(a::Vector{T}, b::Vector{T}; α::Float64 = 0.5)::Tuple{V
     for i in 1:length(a)
         hi, lo = (a[i] > b[i]) ? (a[i], b[i]) : (b[i], a[i])
         # We need to avoid multiplying by 0, if parents are equal
-        d::Float64 = max(abs(hi-lo) * α, ϵ)
+        d::Float64 = abs(hi-lo) * α + ϵ
         x, y = rand(Uniform(lo - d, hi + d), 2)
         push!(child_a, x), push!(child_b, y) 
     end

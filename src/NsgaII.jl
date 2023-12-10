@@ -21,7 +21,7 @@ mutable struct NsgaII
         @assert(pop_size > 0)
         pop_size += isodd(pop_size)
         return new(
-            problem, initialize_population(problem, init, pop_size), 
+            problem, initialize_population(NsgaII, problem, init, pop_size), 
             init, selection, crossover, mutation, pop_size,
             crossover_chance, mutation_chance
         )
@@ -29,11 +29,10 @@ mutable struct NsgaII
 end
 
 
-function step(nsga::NsgaII)::Union{Vector{Individual}, Individual, Nothing}
+function alg_step(nsga::NsgaII)::Union{Vector{Individual}, Individual, Nothing}
     # println("Performing step of NsgaII algorithm")
     if isempty(nsga.population)
-        println("Error occured while initializing children!")
-        return nothing
+        throw(ErrorException("Error, empty population set!"))
     end
     # ------ Selection, crossover, mutation, fitness ------ 
     # println("Performing selection, crossover, mutation and fitness")
@@ -42,13 +41,13 @@ function step(nsga::NsgaII)::Union{Vector{Individual}, Individual, Nothing}
         i, j = rand(indexes, 2)
         # Crossover
         a, b = (
-            (rand() > nsga.crossover_chance) ? 
+            (rand() < nsga.crossover_chance) ? 
             nsga.crossover(nsga.population[i].solution, nsga.population[j].solution) : 
             (deepcopy(nsga.population[i].solution), deepcopy(nsga.population[j].solution))
         )
         # Mutation
-        if (rand() > nsga.mutation_chance); nsga.mutation!(a) end
-        if (rand() > nsga.mutation_chance); nsga.mutation!(b) end
+        if (rand() < nsga.mutation_chance); nsga.mutation!(a) end
+        if (rand() < nsga.mutation_chance); nsga.mutation!(b) end
         # Evaluation
         push!(nsga.population, Individual(a, nsga.problem.optimization))
         push!(nsga.population, Individual(b, nsga.problem.optimization))
@@ -66,7 +65,11 @@ function step(nsga::NsgaII)::Union{Vector{Individual}, Individual, Nothing}
             start = last
             continue
         end
-        set_crowding_distance!(view(nsga.population, start:last-1), nsga.problem.optimization.num_objectives)
+        set_crowding_distance!(
+            view(nsga.population, start:last-1), 
+            nsga.problem.optimization.num_objectives, 
+            nsga.problem.definition.problem_type
+        )
         start = last
     end
     # Sort the last set, if it is unclear what will be taken into new population
@@ -78,8 +81,8 @@ function step(nsga::NsgaII)::Union{Vector{Individual}, Individual, Nothing}
     end
     # Replacement strategy
     nsga.population = nsga.population[begin:nsga.pop_size]
-    # Return the best solutions (the ones with rank equal to 1 -> pareto front)
-    return filter(x -> x.rank == 1, nsga.population)
+    # Return all feasible solutions
+    return filter(x -> is_feasible(x), nsga.population)
 end
 
 
@@ -133,18 +136,19 @@ function domination_sort!(population::Vector{Individual}, problem_type::Union{Ty
     return
 end
 
-function set_crowding_distance!(population::AbstractVector{Individual}, objectives::Int64)::Nothing
+function set_crowding_distance!(population::AbstractVector{Individual}, objectives::Int64, problem_type::Union{Type{Maximization}, Type{Minimization}})::Nothing
     @assert length(unique([indiv.rank for indiv in population])) == 1
     # No need to compute crowding distance for only 2 or 1 individuals
     if length(population) <= 2
         population[begin].crowding_distance = population[end].crowding_distance = 0
         return
     end
+    reversed::Bool = (problem_type == Maximization)
     len::Int64 = length(population)
     width::Real = 0
     if objectives == 1
         @assert all([isa(indiv.value, Real) for indiv in population])
-        sort!(population, by = x -> x.value)
+        sort!(population, by = x -> x.value, rev=reversed)
         population[begin].crowding_distance = population[end].crowding_distance = Inf64
         # No need to compute crowding distance, if solutions have the same values
         if population[begin].value != population[end].value
@@ -158,7 +162,7 @@ function set_crowding_distance!(population::AbstractVector{Individual}, objectiv
         @assert all([length(indiv.value) == objectives for indiv in population])
         # Compute crowding distance for each objective
         for objective in 1:objectives 
-            sort!(population, by = x -> x.value[objective])
+            sort!(population, by = x -> x.value[objective], rev=reversed)
             population[begin].crowding_distance = population[end].crowding_distance = Inf64
             # No need to compute crowding distance, if solutions have the same values
             if population[begin].value[objective] != population[end].value[objective]
@@ -176,13 +180,12 @@ end
 
 # ------------------------------- Utils ------------------------------- 
 
-function initialize_population(problem::Problem, init::Function, size::Int64)::Vector{Individual}
+function initialize_population(::Type{NsgaII}, problem::Problem, init::Function, size::Int64)::Vector{Individual}
     println("Initializing population of type: $(problem.definition.representation_type), size: $(size)")
     println("Initialization function: $(init)")
     population::Vector{Individual} = [Individual(init(problem), problem.optimization) for _ in 1:size]
     if !all([is_type(indiv.solution) == problem.definition.representation_type for indiv in population])
-        println("Error, expected child type: $(problem.definition.representation_type), but init returned other!")
-        return []
+        throw(ErrorException("Error, expected child type: $(problem.definition.representation_type), but init returned other!"))
     end
     return population
 end
@@ -198,4 +201,4 @@ function info(nsga::NsgaII)::Nothing
 end
 
 
-export NsgaII, step
+export NsgaII, alg_step, info

@@ -2,7 +2,7 @@ import Random: shuffle!
 
 function uniform_init(problem::Problem)::Vector{Float64}
     @assert (problem.definition.representation_type == Numbers) && (problem.optimization.bounds_count != 0)
-    return [rand(Uniform{Float64}(lb, ub)) for (lb, ub) in zip(opt.bounds[1], opt.bounds[2])]
+    return [rand(Uniform{Float64}(lb, ub)) for (lb, ub) in zip(problem.optimization.bounds[1], problem.optimization.bounds[2])]
 end
 
 function permutation_init(problem::Problem)::Vector{Int64}

@@ -2,11 +2,11 @@ import LinearAlgebra: dot
 
 struct Knapsack
     num_items::Int64
-    capacity::Int64
+    capacity::Union{Int64, Float64}
     weights::Vector{Int64}
     costs::Vector{Int64}
-    Knapsack(num_items::Int64, capacity::Int64, weights::Vector{Int64}, costs::Vector{Int64}) = new(num_items, capacity, weights, costs)
-    Knapsack(capacity::Int64, weights::Vector{Int64}, costs::Vector{Int64}) = new(length(weights), capacity, weights, costs)
+    Knapsack(num_items::Int64, capacity::Union{Int64, Float64}, weights::Vector{Int64}, costs::Vector{Int64}) = new(num_items, capacity, weights, costs)
+    Knapsack(capacity::Union{Int64, Float64}, weights::Vector{Int64}, costs::Vector{Int64}) = new(length(weights), capacity, weights, costs)
 end
 
 function read_knapsack(file_name::String)::Union{Vector{Knapsack}, Nothing}
@@ -57,6 +57,25 @@ function knapsack_to_problem(knapsack::Knapsack, name::String = "knapsack")::Pro
         Definition(name, Maximization, Binary, knapsack.num_items),
         Optimization(x -> dot(x, knapsack.costs), 1, x -> (dot(x, knapsack.weights) - knapsack.capacity))
     )
+end
+
+function load_pareto(pareto_file::String)::Union{Vector{Vector{Int64}}, Nothing}
+    if !file_exists(get_knapsack_path(pareto_file))
+        return nothing
+    end
+    dimension::Int64 = split(pareto_file, ".")[-2]
+    println("Reading file: $(get_knapsack_path(pareto_file))")
+    solutions::Vector{Vector{Int64}} = []
+    open(get_knapsack_path(file_name), "r") do io
+        while !eof(io)
+            line::String = strip(readline(io))
+            values::Vector{String} = split(line)
+            if length(values) == dimension
+                push!(solutions, map(x -> tryparse(Int64, x), values))
+            end
+        end
+    end
+    return solutions
 end
 
 
@@ -113,18 +132,18 @@ function read_knapsack(io::IO, number::Int64)::Union{Knapsack, Nothing}
     return Knapsack(capacity, weights, costs)
 end
 
-function read_param(io::IO, item_name::String)::Union{Nothing, Int64}
+function read_param(io::IO, item_name::String)::Union{Nothing, Int64, Float64}
     if eof(io)
         println("Cannot param read: $(item_name) of knapsack, eof!")
         return nothing, nothing
     end
     line = split(strip(readline(io)))
-    if length(line) != 2 || line[1] != "$(item_name)" || isnothing(tryparse(Int64, line[2]))
+    if length(line) != 2 || line[1] != "$(item_name)" || isnothing(tryparse(Int64, line[2])) && isnothing(tryparse(Float64, line[2]))
         println("Unable to read: '$(item_name)', incorrect line: $(line)")
         return nothing
     end
-    return parse(Int64, line[2])
+    return isnothing(tryparse(Int64, line[2])) ? tryparse(Float64, line[2]) : tryparse(Int64, line[2])
 end
 
 
-export Knapsack, read_knapsack, knapsack_to_problem
+export Knapsack, read_knapsack, knapsack_to_problem, load_pareto

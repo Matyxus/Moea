@@ -27,13 +27,13 @@ struct Optimization{N}
     ) = new{0}(objective, num_objectives, (x -> (|>).(Ref(x), constraints)), length(constraints), nothing, 0)
 
     Optimization(objective::Function, num_objectives::Int64, constraints::Vector{Function}, bounds::NTuple{2, NTuple{N, V}}
-    ) where {N, V <: Real} = new{N}(objective, num_objectives, (x -> (|>).(Ref(x), constraints)), length(constraints), bounds, length(bounds))
+    ) where {N, V <: Real} = new{N}(objective, num_objectives, (x -> (|>).(Ref(x), constraints)), length(constraints), bounds, N)
 
     Optimization(objective::Vector{Function}, num_objectives::Int64, constraints::Vector{Function}, bounds::NTuple{2, NTuple{N, V}} 
     ) where {N, V <: Real} = new{N}(
         (x -> (|>).(Ref(x), objective)), num_objectives,
         (x -> (|>).(Ref(x), constraints)), length(constraints), 
-        bounds, length(bounds)
+        bounds, N
     )
 
     Optimization(objective::Vector{Function}, num_objectives::Int64, constraints::Vector{Function}) = new{0}(
@@ -65,8 +65,8 @@ end
 
 # --- Bounds --- 
 bound_violation(solution::Any, bounds::Nothing)::Real = 0
-bound_violation(solution::Real, bounds::NTuple{2, NTuple{1, Real}})::Real = max(0, solution - bounds[2][1], bounds[1][1] - solution)
-bound_violation(solution::Vector{<: Real}, bounds::NTuple{2, NTuple{N, Real}}) where {N} = sum(max.(0, solution .- bounds[2], bounds[1] .- solution))
+bound_violation(solution::Real, bounds::NTuple{2, NTuple{1, Real}})::Real = (max(0, solution - bounds[2][1], bounds[1][1] - solution) > 0) ? Inf64 : 0
+bound_violation(solution::Vector{<: Real}, bounds::NTuple{2, NTuple{N, Real}}) where {N} = (sum(max.(0, solution .- bounds[2], bounds[1] .- solution)) > 0) ? Inf64 : 0
 # --- Constraints --- 
 # Here we are assuming that constraints were transformed into "<= 0" forms
 constrain_violation(constrain_value::Real)::Real = max(0, constrain_value)
@@ -95,9 +95,5 @@ function info(optimization::Optimization)::Nothing
     return
 end
 
-function check_params(definition::Definition, optimization::Optimization)::Bool
-    
-end
-
-export Definition, Optimization, Problem
+export Definition, Optimization, Problem, info
 

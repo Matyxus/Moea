@@ -10,5 +10,5 @@ function tournament_selection(population::Vector{Individual}, size::Int64, tourn
     return [minimum(rand(1:len, tournament_size)) for _ in 1:size]
 end
 
-export binary_tournament_selection
+export binary_tournament_selection, tournament_selection
 
