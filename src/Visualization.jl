@@ -40,7 +40,7 @@ function plot_result(log_name::String, title::String = "", optimum::Union{Real, 
         return nothing
     end
     # Plot points
-    result_plot::Plots.Plot{Plots.GRBackend} = scatter((data["data"][begin]["iteration"], data["data"][begin]["value"]), color="blue", label="best: $(round(data["data"][begin]["value"], digits=4))", markersize = 2)
+    result_plot::Plots.Plot{Plots.GRBackend} = scatter((data["data"][begin]["iteration"], data["data"][begin]["value"]), color="blue", label="best: $(round(data["data"][begin]["value"], digits=4))", markersize = 4)
     for i in 2:length(data["data"]) 
         scatter!((data["data"][i]["iteration"], data["data"][i]["value"]), color="black", label="", markersize = 1)
     end
