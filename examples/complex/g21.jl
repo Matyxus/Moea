@@ -20,8 +20,8 @@ opt::Optimization = Optimization(
     )
 )
 prob::Problem = Problem(def, opt)
-nsga::NsgaII = NsgaII(prob, uniform_init, binary_tournament_selection, blend_crossover, normal_mutation!)
-sr::StochasticRanking = StochasticRanking(prob, uniform_init, tournament_selection, blend_crossover, normal_mutation!)
+nsga::NsgaII = NsgaII(prob, uniform_init, binary_tournament_selection, blend_crossover, normal_mutation!, crossover_chance=0.8, mutation_chance=0.05)
+sr::StochasticRanking = StochasticRanking(prob, uniform_init, tournament_selection, blend_crossover, normal_mutation!, crossover_chance=0.3, mutation_chance=0.2)
 run_algorithm(5000, nsga, "g21_nsga")
 run_algorithm(5000, sr, "g21_sr")
 

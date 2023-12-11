@@ -1,4 +1,4 @@
-import JSON: print as j_print
+import JSON: print as j_print, parsefile
 """
 Structure saving results of algorithms
 in vector of tuples: (iteration, solution, objecetive value)

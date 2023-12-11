@@ -63,10 +63,11 @@ function load_pareto(pareto_file::String)::Union{Vector{Vector{Int64}}, Nothing}
     if !file_exists(get_knapsack_path(pareto_file))
         return nothing
     end
-    dimension::Int64 = split(pareto_file, ".")[-2]
-    println("Reading file: $(get_knapsack_path(pareto_file))")
+    dimension::Int64 = tryparse(Int64, split(pareto_file, ".")[end-1])
+    file_name::String = get_knapsack_path(pareto_file)
+    println("Reading file: $(file_name)")
     solutions::Vector{Vector{Int64}} = []
-    open(get_knapsack_path(file_name), "r") do io
+    open(file_name, "r") do io
         while !eof(io)
             line::String = strip(readline(io))
             values::Vector{String} = split(line)

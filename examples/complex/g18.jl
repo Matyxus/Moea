@@ -5,7 +5,7 @@ f(x)::Float64 = -0.5 * (x[1]*x[4] - x[2]*x[3] + x[3]*x[9] - x[5]*x[9] + x[5]*x[8
 # Constrains
 g1(x)::Float64 = x[3]^2 + x[4]^2 - 1
 g2(x)::Float64 = x[9]^2 - 1
-g3(x)::Float64 = x[5]^2 + x[5]^2 - 1
+g3(x)::Float64 = x[5]^2 + x[6]^2 - 1
 g4(x)::Float64 = x[1]^2 + (x[3]-x[9])^2 - 1
 g5(x)::Float64 = (x[1]-x[5])^2 + (x[2]-x[6])^2 - 1
 g6(x)::Float64 = (x[1]-x[7])^2 + (x[2]-x[8])^2 -1
@@ -26,8 +26,8 @@ opt::Optimization = Optimization(
     )
 )
 prob::Problem = Problem(def, opt)
-nsga::NsgaII = NsgaII(prob, uniform_init, binary_tournament_selection, blend_crossover, normal_mutation!)
-sr::StochasticRanking = StochasticRanking(prob, uniform_init, tournament_selection, blend_crossover, normal_mutation!)
+nsga::NsgaII = NsgaII(prob, uniform_init, binary_tournament_selection, blend_crossover, normal_mutation!, crossover_chance=0.8, mutation_chance=0.05)
+sr::StochasticRanking = StochasticRanking(prob, uniform_init, tournament_selection, blend_crossover, normal_mutation!, crossover_chance=0.8)
 run_algorithm(5000, nsga, "g18_nsga")
 run_algorithm(5000, sr, "g18_sr")
 

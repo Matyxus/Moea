@@ -140,10 +140,10 @@ function info(sr::StochasticRanking)::Nothing
     info(sr.problem)
     println("Algorithm StochasticRanking, population: '$(sr.pop_size)'")
     println("Initialization: '$(sr.initialization)', selection: '$(sr.selection)'")
-    println("Crossover: '$(sr.crossover)', chance: $(sr.crossover_chance)%")
-    println("Mutation: '$(sr.mutation!)', chance: $(sr.mutation_chance)%")
+    println("Crossover: '$(sr.crossover)', chance: $(sr.crossover_chance * 100)%")
+    println("Mutation: '$(sr.mutation!)', chance: $(sr.mutation_chance * 100)%")
     return
 end
 
 
-export StochasticRanking, alg_step, info
+export StochasticRanking, alg_step, info, generate_individual

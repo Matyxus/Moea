@@ -95,5 +95,5 @@ function info(optimization::Optimization)::Nothing
     return
 end
 
-export Definition, Optimization, Problem, info
+export Definition, Optimization, Problem, info, constrain_violation, constrain_violation_squared, bound_violation
 

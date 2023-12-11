@@ -195,8 +195,8 @@ function info(nsga::NsgaII)::Nothing
     info(nsga.problem)
     println("Algorithm NSGA-II, population: '$(nsga.pop_size)'")
     println("Initialization: '$(nsga.initialization)', selection: '$(nsga.selection)'")
-    println("Crossover: '$(nsga.crossover)', chance: $(nsga.crossover_chance)%")
-    println("Mutation: '$(nsga.mutation!)', chance: $(nsga.mutation_chance)%")
+    println("Crossover: '$(nsga.crossover)', chance: $(nsga.crossover_chance * 100)%")
+    println("Mutation: '$(nsga.mutation!)', chance: $(nsga.mutation_chance * 100)%")
     return
 end
 

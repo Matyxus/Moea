@@ -30,7 +30,7 @@ function plot_constrain(g::Function, lb::Tuple, ub::Tuple, title::String = "", o
     return objective_plot
 end
 
-function plot_result(log_name::String, optimal::Union{Real, Nothing} = nothing)::Union{Plots.Plot{Plots.GRBackend}, Nothing}
+function plot_result(log_name::String, title::String = "", optimum::Union{Real, Nothing} = nothing)::Union{Plots.Plot{Plots.GRBackend}, Nothing}
     if !file_exists(get_log_path(log_name))
         return nothing
     end
@@ -39,19 +39,22 @@ function plot_result(log_name::String, optimal::Union{Real, Nothing} = nothing):
         prinlnt("Data from log: $(log_name) are empty!")
         return nothing
     end
-    result_plot::Plots.Plot{Plots.GRBackend} = scatter(data["data"][begin]["iteration"], data["data"][begin]["value"], color="blue", label="best", markersize = 2)
-    if !isnothing(optimal)
-        hline!(optimal, color="red", label="optimal", markersize = 2)
-    end
+    # Plot points
+    result_plot::Plots.Plot{Plots.GRBackend} = scatter((data["data"][begin]["iteration"], data["data"][begin]["value"]), color="blue", label="best: $(round(data["data"][begin]["value"], digits=4))", markersize = 2)
     for i in 2:length(data["data"]) 
-        scatter!(data["data"][i]["iteration"], data["data"][i]["value"], color="black", markersize = 1)
+        scatter!((data["data"][i]["iteration"], data["data"][i]["value"]), color="black", label="", markersize = 1)
     end
+    # Plot optimal solution
+    if !isnothing(optimum)
+        hline!([optimum], color="red", label="optimum: $(round(optimum, digits=4))", markersize = 2)
+    end
+    title!(title)
     xlabel!("Iterations")
     ylabel!("Objective value")
     return result_plot
 end
 
-function plot_knapsack_result(log_name::String, pareto::String = "")::Union{Plots.Plot{Plots.GRBackend}, Nothing}
+function plot_knapsack_result(log_name::String, title::String = "", pareto::String = "")::Union{Plots.Plot{Plots.GRBackend}, Nothing}
     if !file_exists(get_log_path(log_name))
         return nothing
     end
@@ -59,26 +62,28 @@ function plot_knapsack_result(log_name::String, pareto::String = "")::Union{Plot
     if isempty(data)
         prinlnt("Data from log: $(log_name) are empty!")
         return nothing
-    elseif data["problem"]["dimension"] != 2
+    elseif data["info"]["dimension"] != 2
         println("Can only show 2D knapsack problems!")
         return nothing
     end
     # Plot found results
-    result_plot::Plots.Plot{Plots.GRBackend} = scatter(data["data"][begin]["solution"], color="blue", label="best", markersize = 2)
+    result_plot::Plots.Plot{Plots.GRBackend} = scatter(Tuple(data["data"][begin]["value"]), color="blue", label="best", markersize = 4)
     for i in 2:length(data["data"]) 
-        scatter!(data["data"][i]["solution"], color="black", label="", markersize = 1)
+        scatter!(Tuple(data["data"][i]["value"]), color="black", label="", markersize = 1)
     end
     # Plot pareto fronts
     if !isempty(pareto)
         fronts = load_pareto(pareto)
         if !isnothing(fronts)
-            scatter!(fronts, color="red", label="", markersize = 2)
+            scatter!(Tuple(fronts[begin]), color="red", label="pareto front", markersize = 2)
+            scatter!(Tuple.(fronts), color="red", label="", markersize = 2)
         end
     end
+    title!(title)
     xlabel!("Objective value 1")
     ylabel!("Objective value 2")
     return result_plot
 end
 
-export plot_objective, plot_constrain, plot_result, plot_knapsack_result
+export plot_objective, plot_constrain, plot_result, plot_knapsack_result, savefig
 

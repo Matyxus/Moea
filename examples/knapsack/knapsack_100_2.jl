@@ -5,7 +5,7 @@ prob::Problem = knapsack_to_problem(knapsacks, "knapsack.100.2")
 nsga::NsgaII = NsgaII(
     prob, binary_init, 
     binary_tournament_selection,
-    uniform_crossover, flip! 
+    uniform_crossover, flip!
 )
 run_algorithm(5000, nsga, "knapsack_100_2")
 

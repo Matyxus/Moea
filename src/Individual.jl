@@ -5,7 +5,13 @@ mutable struct Individual{T, V}
     # NsgaII parameters
     rank::Int64 
     crowding_distance::Float64
-    function Individual(solution::AbstractVector{T}, value::V, violation::Real = 0.) where {T <: Real, V <: Union{AbstractVector, Real}}
+    function Individual(solution::AbstractVector{T}, value::V) where {T <: Real, V <: Union{AbstractVector, Real}}
+        if isnothing(is_type(solution))
+            println("Warning, Inidividual received invalid solution type: $(T)!")
+        end
+        return new{T, V}(solution, value, 0, 0, 0.)
+    end
+    function Individual(solution::AbstractVector{T}, value::V, violation::Real) where {T <: Real, V <: Union{AbstractVector, Real}}
         if isnothing(is_type(solution))
             println("Warning, Inidividual received invalid solution type: $(T)!")
         end

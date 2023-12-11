@@ -10,8 +10,8 @@ h3(x)::Float64 = abs(x[1]^3 + x[2]^3 + 1) - ϵ
 def::Definition = Definition("g13", Minimization, Numbers, 5)
 opt::Optimization = Optimization(f, 1, [h1, h2, h3], ((-2.3, -2.3, -3.2, -3.2, -3.2), (2.3, 2.3, 3.2, 3.2, 3.2)))
 prob::Problem = Problem(def, opt)
-nsga::NsgaII = NsgaII(prob, uniform_init, binary_tournament_selection, blend_crossover, normal_mutation!)
-sr::StochasticRanking = StochasticRanking(prob, uniform_init, tournament_selection, blend_crossover, normal_mutation!)
+nsga::NsgaII = NsgaII(prob, uniform_init, binary_tournament_selection, blend_crossover, normal_mutation!, crossover_chance=0.8, mutation_chance=0.05)
+sr::StochasticRanking = StochasticRanking(prob, uniform_init, tournament_selection, blend_crossover, normal_mutation!, crossover_chance=0.3, mutation_chance=0.2)
 run_algorithm(5000, nsga, "g13_nsga")
 run_algorithm(5000, sr, "g13_sr")
 
