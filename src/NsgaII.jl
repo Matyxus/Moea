@@ -1,3 +1,4 @@
+# https://ieeexplore.ieee.org/document/996017
 mutable struct NsgaII
     problem::Problem
     population::Vector{Individual}
