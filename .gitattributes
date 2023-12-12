@@ -1,2 +1,3 @@
 *.pareto linguist-documentation
-*.(0-9) linguist-documentation
+*.2 linguist-documentation
+*.3 linguist-documentation
