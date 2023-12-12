@@ -77,12 +77,12 @@ in their individual julia files:
 <details>
   <summary>Stochastic Ranking</summary>
   Standard implementation of Stochastic Ranking for single objective optimization,
-  used rank based tournament selection (which after sorting the population defaults to choosing the invidivual with lower index).
+  uses rank based tournament selection (which after sorting the population defaults to choosing the invidivual with lower index).
 </details>
 
 <details>
   <summary>NSGA-II</summary>
-  Classical implementation of algorithm is provided. It is defind for both single and multi objective optimization, modified binary tournament operator is also provided to choose better solutions.
+  Classical implementation of algorithm is provided. It is defind for both single and multi objective optimization, modified binary tournament operator is also provided to select better individuals.
 </details>
 
 <p align="right">(<a href="#top">back to top</a>)</p>
