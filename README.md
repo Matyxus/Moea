@@ -89,7 +89,7 @@ in their individual julia files:
 
 <!-- USAGE EXAMPLES -->
 ## Usage
-To use the project, run the following command:
+Example of how to use the project and define problems:
 ```julia
 using Moea
 # Probblem definition
